@@ -14,5 +14,5 @@ abstract class DatatransPluginFlutterPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> getPlatformVersion();
+  Future<String?> initializeTransaction();
 }
