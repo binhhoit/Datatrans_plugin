@@ -13,8 +13,11 @@ A new Flutter plugin project.
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
   s.source           = { :path => '.' }
+  s.static_framework = true
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
+  s.dependency 'Alamofire'
+  s.dependency 'Datatrans'
   s.platform = :ios, '11.0'
 
   # Flutter.framework does not contain a i386 slice.

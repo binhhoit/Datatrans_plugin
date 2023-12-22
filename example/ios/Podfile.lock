@@ -1,0 +1,39 @@
+PODS:
+  - Alamofire (5.8.1)
+  - Datatrans (3.4.0)
+  - datatrans_plugin_flutter (0.0.1):
+    - Alamofire
+    - Datatrans
+    - Flutter
+  - Flutter (1.0.0)
+  - integration_test (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - datatrans_plugin_flutter (from `.symlinks/plugins/datatrans_plugin_flutter/ios`)
+  - Flutter (from `Flutter`)
+  - integration_test (from `.symlinks/plugins/integration_test/ios`)
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+    - Datatrans
+
+EXTERNAL SOURCES:
+  datatrans_plugin_flutter:
+    :path: ".symlinks/plugins/datatrans_plugin_flutter/ios"
+  Flutter:
+    :path: Flutter
+  integration_test:
+    :path: ".symlinks/plugins/integration_test/ios"
+
+SPEC CHECKSUMS:
+  Alamofire: 3ca42e259043ee0dc5c0cdd76c4bc568b8e42af7
+  Datatrans: 701b3f35539d93b240e866fc8fb5761bc7337290
+  datatrans_plugin_flutter: 04dc752ba764c26a26746c33aead24b3f60cae70
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  integration_test: 13825b8a9334a850581300559b8839134b124670
+
+PODFILE CHECKSUM: 70d9d25280d0dd177a5f637cdb0f0b0b12c6a189
+
+COCOAPODS: 1.13.0
