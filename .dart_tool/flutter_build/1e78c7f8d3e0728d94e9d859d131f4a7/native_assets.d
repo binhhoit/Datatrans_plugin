@@ -1,0 +1,1 @@
+ /Users/thien.vu2/Desktop/working/datatrans_plugin/.dart_tool/flutter_build/1e78c7f8d3e0728d94e9d859d131f4a7/native_assets.yaml: 
