@@ -1,3 +1,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="com.sts.datatrans_plugin_flutter">
+
+    <application>
+        <activity
+            android:name="ch.datatrans.payment.ExternalProcessRelayActivity"
+            android:launchMode="singleTask"
+            android:enabled="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.sts.datatrans_plugin_flutter.dtsdk" />
+            </intent-filter>
+        </activity>
+
+    </application>
 </manifest>

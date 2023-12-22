@@ -3,10 +3,13 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://datatrans.jfrog.io/artifactory/mobile-sdk/' }
+        maven { url 'https://x.klarnacdn.net/mobile-sdk/' }
     }
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.android.tools.build:gradle:8.0.2'
     }
 }
 
@@ -14,6 +17,8 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://datatrans.jfrog.io/artifactory/mobile-sdk/' }
+        maven { url 'https://x.klarnacdn.net/mobile-sdk/' }
     }
 }
 
