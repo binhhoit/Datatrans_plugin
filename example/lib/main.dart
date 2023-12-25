@@ -52,7 +52,10 @@ class Home extends StatelessWidget {
                 currency: "USD",
                 paymentMethods: [
                   PaymentMethodType.masterCard,
-                  PaymentMethodType.visa
+                  PaymentMethodType.visa,
+                  PaymentMethodType.jcb,
+                  PaymentMethodType.paypal,
+                  PaymentMethodType.americanExpress
                 ]);
               var success = await _datatransFlutterPlugin.payment(params: params);
               if (success) {

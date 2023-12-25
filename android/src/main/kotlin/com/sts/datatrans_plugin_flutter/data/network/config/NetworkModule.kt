@@ -1,6 +1,5 @@
 package com.sts.datatrans_plugin_flutter.data.network.config
 
-import android.net.sip.SipErrorCode.TIME_OUT
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

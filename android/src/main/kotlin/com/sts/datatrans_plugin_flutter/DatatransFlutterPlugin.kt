@@ -44,7 +44,7 @@ class DatatransFlutterPlugin :
     }
 
     private lateinit var context: Context
-    private var activity: Activity? =null
+    private var activity: Activity? = null
     private lateinit var channel: MethodChannel
     private lateinit var transaction: Transaction
     private var repository: DatatransRepository
@@ -62,14 +62,17 @@ class DatatransFlutterPlugin :
             return
         transaction = Transaction(tokenPayment!!)
         transaction.apply {
-            //options.appCallbackScheme = "https://sts.com"
+            options.appCallbackScheme = "app.datatrans.flutter"
             listener = object : TransactionListener {
                 override fun onTransactionError(exception: TransactionException) {
-                    exception.printStackTrace()
+                    this@DatatransFlutterPlugin.result?.error(
+                        "400",
+                        "Payment error",
+                        exception)
                 }
 
                 override fun onTransactionSuccess(result: TransactionSuccess) {
-                    result.transactionId
+                    this@DatatransFlutterPlugin.result?.success(result)
                 }
             }
             options.isTesting = true
@@ -93,7 +96,6 @@ class DatatransFlutterPlugin :
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         this.result = result
-        Log.e(TAG, call.method)
         when (call.method) {
             DatatransMethod.INITIALIZE.label -> {
                 val merchantId = call.argument<String>("merchantId")
