@@ -1,4 +1,6 @@
 import 'dart:core';
+import 'package:datatrans_plugin_flutter/src/model/payment_card_info.dart';
+import 'package:datatrans_plugin_flutter/src/model/saved_payment_params.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -33,5 +35,20 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
     var dict = params.toJson();
     final success = await methodChannel.invokeMethod<bool>(methodName, dict);
     return success ?? false;
+  }
+  
+  @override
+  Future<bool> fastPayment(SavedPaymentParams params) async {
+    var methodName = DatatransMethodIdentity.fastPayment.methodName;
+    var dict = params.toJson();
+    final success = await methodChannel.invokeMethod<bool>(methodName, dict);
+    return success ?? false;
+  }
+  
+  @override
+  Future<List<PaymentCardInfo>?> getAllPaymentAlias() async {
+    var methodName = DatatransMethodIdentity.getAllPaymentAlias.methodName;
+    final map = await methodChannel.invokeMethod<List<Map<String, dynamic>>>(methodName);
+    return map?.map((e) => PaymentCardInfo.fromJson(e)).toList();
   }
 }

@@ -51,8 +51,8 @@ class Home extends StatelessWidget {
                 amount: 1000,
                 currency: "USD",
                 paymentMethods: [
-                  PaymentMethodType.masterCard.rawValue,
-                  PaymentMethodType.visa.rawValue
+                  PaymentMethodType.masterCard,
+                  PaymentMethodType.visa
                 ]);
               var success = await _datatransFlutterPlugin.payment(params: params);
               if (success) {
