@@ -12,7 +12,9 @@ class Constants {
 }
 
 enum MethodIdentity: String {
-    case initializeTransaction = "initializeTransaction"
+    case initialize = "initialize"
+    case saveCardPaymentInfo = "saveCardPaymentInfo"
+    case payment = "payment"
 }
 
 enum PaymentMethodType: String {

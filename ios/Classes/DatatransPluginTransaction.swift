@@ -10,10 +10,13 @@ import Alamofire
 import Datatrans
 
 class DatatransPluginTransaction {
-    private let merchantId: String
-    private let password: String
+    static let instance = DatatransPluginTransaction()
+    private init() {}
+
+    private var merchantId: String = ""
+    private var password: String = ""
     
-    init(merchantId: String, password: String) {
+    func configure(merchantId: String, password: String) {
         self.merchantId = merchantId
         self.password = password
     }

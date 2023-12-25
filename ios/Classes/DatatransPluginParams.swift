@@ -7,6 +7,16 @@
 
 import Alamofire
 
+class TransactionInitializeParams {
+    private(set) var merchantId: String
+    private(set) var password: String
+    
+    init(dict: [String: Any]) {
+        self.merchantId = (dict["merchantId"] as? String) ?? ""
+        self.password = (dict["password"] as? String) ?? ""
+    }
+}
+
 class TransactionParams {
     private(set) var currency: String
     private(set) var referenceNo: String

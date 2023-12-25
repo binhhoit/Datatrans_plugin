@@ -1,3 +1,5 @@
+import 'dart:core';
+
 import 'package:datatrans_plugin_flutter/src/datatrans_plugin_flutter_define.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -9,9 +11,29 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
   final methodChannel = const MethodChannel('datatrans_plugin_flutter');
 
   @override
-  Future<String?> initializeTransaction() async {
-    var methodName = DatatransMethodIdentity.initializeTransaction.methodName;
-    final version = await methodChannel.invokeMethod<String>(methodName);
-    return version;
+  void initialize(String merchantId, String password) async {
+    var methodName = DatatransMethodIdentity.initialize.methodName;
+    var dict = {
+      "merchantId" : merchantId, 
+      "password": password
+    };
+    await methodChannel.invokeMethod(methodName, dict);
+  }
+
+  @override
+  Future<bool?> saveCardPaymentInfo() async {
+    var methodName = DatatransMethodIdentity.saveCardPaymentInfo.methodName;
+    final success = await methodChannel.invokeMethod<bool>(methodName);
+    return success;
+  }
+
+  @override
+  Future<bool?> payment(int amount) async {
+    var methodName = DatatransMethodIdentity.payment.methodName;
+    var dict = {
+      "amount" : amount
+    };
+    final success = await methodChannel.invokeMethod<bool>(methodName, dict);
+    return success;
   }
 }
