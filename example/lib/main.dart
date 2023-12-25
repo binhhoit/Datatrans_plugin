@@ -58,8 +58,8 @@ class Home extends StatelessWidget {
                   PaymentMethodType.americanExpress
                 ]);
               var success = await _datatransFlutterPlugin.payment(params: params);
-              if (success) {
-                _showMyDialog(context, success);
+              if (success?.success ?? false) {
+                _showMyDialog(context, success?.success ?? false);
               }
             },
           ),

@@ -1,10 +1,10 @@
 import 'dart:core';
-import 'package:datatrans_plugin_flutter/src/model/payment_card_info.dart';
+import 'package:datatrans_plugin_flutter/src/model/datatrans_base_response.dart';
 import 'package:datatrans_plugin_flutter/src/model/saved_payment_params.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'package:datatrans_plugin_flutter/src/model/datatrans_define.dart';
+import 'package:datatrans_plugin_flutter/src/datatrans_define.dart';
 import 'package:datatrans_plugin_flutter/src/model/payment_params.dart';
 import 'datatrans_plugin_flutter_platform_interface.dart';
 
@@ -19,36 +19,69 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
       "merchantId" : merchantId, 
       "password": password
     };
-    await methodChannel.invokeMethod(methodName, dict);
+    var results = await methodChannel.invokeMethod<Map<String, dynamic>>(methodName, dict);
+
+    if (results != null) {
+      var response = DatatransResponse<void>.fromJson(
+        results,
+        (e) => ());
+      print("initialize ${response.error}");
+    }
   }
 
   @override
-  Future<bool> saveCardPaymentInfo() async {
+  Future<DatatransResponse<void>?> saveCardPaymentInfo() async {
     var methodName = DatatransMethodIdentity.saveCardPaymentInfo.methodName;
-    final success = await methodChannel.invokeMethod<bool>(methodName);
-    return success ?? false;
+    try {
+      final results = await methodChannel.invokeMethod<Map<String, dynamic>>(methodName);
+      if (results != null) {
+        var response = DatatransResponse<void>.fromJson(
+          results,
+          (e) => ());
+        return response;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
 
   @override
-  Future<bool> payment(PaymentParams params) async {
+  Future<DatatransResponse<SavedPaymentParams>?> payment(PaymentParams params) async {
     var methodName = DatatransMethodIdentity.payment.methodName;
     var dict = params.toJson();
-    final success = await methodChannel.invokeMethod<bool>(methodName, dict);
-    return success ?? false;
+    try {
+      final results = await methodChannel.invokeMethod<Map<String, dynamic>>(methodName, dict);
+      if (results != null) {
+        var response = DatatransResponse<SavedPaymentParams>.fromJson(
+          results,
+          (e) => SavedPaymentParams.fromJson(e as Map<String, dynamic>));
+        return response;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
   
   @override
-  Future<bool> fastPayment(SavedPaymentParams params) async {
+  Future<DatatransResponse<SavedPaymentParams>?> fastPayment(PaymentParams params, SavedPaymentParams saveParams) async {
     var methodName = DatatransMethodIdentity.fastPayment.methodName;
-    var dict = params.toJson();
-    final success = await methodChannel.invokeMethod<bool>(methodName, dict);
-    return success ?? false;
-  }
-  
-  @override
-  Future<List<PaymentCardInfo>?> getAllPaymentAlias() async {
-    var methodName = DatatransMethodIdentity.getAllPaymentAlias.methodName;
-    final map = await methodChannel.invokeMethod<List<Map<String, dynamic>>>(methodName);
-    return map?.map((e) => PaymentCardInfo.fromJson(e)).toList();
+    var dict = {
+      "payment" : params.toJson(), 
+      "cards": saveParams.toJson()
+    };
+    try {
+      final results = await methodChannel.invokeMethod<Map<String, dynamic>>(methodName, dict);
+      if (results != null) {
+        var response = DatatransResponse<SavedPaymentParams>.fromJson(
+          results,
+          (e) => SavedPaymentParams.fromJson(e as Map<String, dynamic>));
+        return response;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
 }

@@ -27,6 +27,12 @@ public class DatatransFlutterPlugin: NSObject, FlutterPlugin {
             }
             transaction.payment(params: params)
         case .saveCardPaymentInfo:
+            let params = TransactionParams(dict: data)
+            let paymentMethod = PaymentMethod(methodType: .MasterCard, alias: "")
+            transaction.paymentCompletion = { isSuccess in
+                result(isSuccess)
+            }
+            transaction.fastPayment(params: params, savePaymentMethod: paymentMethod)
             return
         default:
             result(FlutterMethodNotImplemented)
