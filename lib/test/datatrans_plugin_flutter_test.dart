@@ -1,8 +1,6 @@
 import 'package:datatrans_plugin_flutter/src/datatrans_plugin_flutter_method_channel.dart';
 import 'package:datatrans_plugin_flutter/src/datatrans_plugin_flutter_platform_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:datatrans_plugin_flutter/datatrans_plugin_flutter.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 // class MockDatatransPluginFlutterPlatform
 //     with MockPlatformInterfaceMixin

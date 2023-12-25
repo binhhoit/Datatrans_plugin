@@ -1,9 +1,9 @@
 import 'dart:core';
-
-import 'package:datatrans_plugin_flutter/src/datatrans_plugin_flutter_define.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import 'package:datatrans_plugin_flutter/src/model/datatrans_define.dart';
+import 'package:datatrans_plugin_flutter/src/model/payment_params.dart';
 import 'datatrans_plugin_flutter_platform_interface.dart';
 
 class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform {
@@ -28,11 +28,9 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
   }
 
   @override
-  Future<bool?> payment(int amount) async {
+  Future<bool?> payment(PaymentParams params) async {
     var methodName = DatatransMethodIdentity.payment.methodName;
-    var dict = {
-      "amount" : amount
-    };
+    var dict = params.toJson();
     final success = await methodChannel.invokeMethod<bool>(methodName, dict);
     return success;
   }

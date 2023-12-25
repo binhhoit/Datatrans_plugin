@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 
-import 'package:flutter/services.dart';
-import 'package:datatrans_plugin_flutter/datatrans_plugin_flutter.dart';
+import 'package:datatrans_plugin_flutter/datatrans_flutter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -34,7 +32,14 @@ class _MyAppState extends State<MyApp> {
         body: Center(
           child: InkWell(
             onTap:() {
-              _datatransFlutterPlugin.payment(amount: 1000);
+              var params = PaymentParams(
+                amount: 1000, 
+                currency: "USD", 
+                paymentMethods: [
+                  PaymentMethodType.masterCard.rawValue,
+                  PaymentMethodType.visa.rawValue
+                ]);
+              _datatransFlutterPlugin.payment(params: params);
             },
             child: const Text('Charge payment'),
           ),
