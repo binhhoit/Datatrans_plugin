@@ -31,7 +31,7 @@ class TransactionParams {
     
     convenience init(dict: [String: Any]) {
         let currency = (dict["currency"] as? String) ?? ""
-        let referenceNo = "dataTrans25122023"
+        let referenceNo = "\(Date().timeIntervalSince1970)"
         let autoSettle = (dict["autoSettle"] as? Bool) ?? false
         let saveAlias = (dict["saveAlias"] as? Bool) ?? false
         let paymentMethod = (dict["paymentMethods"] as? [String]) ?? []

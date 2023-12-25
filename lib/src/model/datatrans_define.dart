@@ -2,7 +2,8 @@ enum DatatransMethodIdentity {
   initialize,
   saveCardPaymentInfo,
   payment,
-  fastPayment
+  fastPayment,
+  getAllPaymentAlias,
 }
 
 extension DatatransMethodIdentityExtend on DatatransMethodIdentity {
@@ -16,6 +17,8 @@ extension DatatransMethodIdentityExtend on DatatransMethodIdentity {
         return 'payment';
       case DatatransMethodIdentity.fastPayment:
         return 'fastPayment';
+      case DatatransMethodIdentity.getAllPaymentAlias:
+        return 'getAllPaymentAlias';
     }
   }
 }
@@ -56,6 +59,33 @@ extension PaymentMethodTypeExtension on PaymentMethodType {
         return "MAU";
       case PaymentMethodType.dankort:
         return "DNK";
+    }
+  }
+
+  static PaymentMethodType fromRawValue(String rawValue) {
+    switch (rawValue) {
+      case "ECA":
+        return PaymentMethodType.masterCard;
+      case "VIS":
+        return PaymentMethodType.visa;
+      case "PAP":
+        return PaymentMethodType.paypal;
+      case "AMX":
+        return PaymentMethodType.americanExpress;
+      case "CUP":
+        return PaymentMethodType.chinnaUnion;
+      case "DIN":
+        return PaymentMethodType.dinnerClub;
+      case "DIS":
+        return PaymentMethodType.discover;
+      case "JCB":
+        return PaymentMethodType.jcb;
+      case "MAU":
+        return PaymentMethodType.maestro;
+      case "DNK":
+        return PaymentMethodType.dankort;
+      default:
+        throw ArgumentError("Invalid raw value: $rawValue");
     }
   }
 }
