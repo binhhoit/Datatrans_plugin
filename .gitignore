@@ -6,7 +6,7 @@
 # Node artifact files
 node_modules/
 dist/
-.dart_tool/
+.dart_tool/*
 examples/ios
 
 # Compiled Java class files
