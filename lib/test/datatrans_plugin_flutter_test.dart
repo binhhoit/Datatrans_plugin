@@ -19,11 +19,11 @@ void main() {
     expect(initialPlatform, isInstanceOf<MethodChannelDatatransPluginFlutter>());
   });
 
-  test('getPlatformVersion', () async {
+  test('initializeTransaction', () async {
     DatatransPluginFlutter datatransPluginFlutterPlugin = DatatransPluginFlutter();
     MockDatatransPluginFlutterPlatform fakePlatform = MockDatatransPluginFlutterPlatform();
     DatatransPluginFlutterPlatform.instance = fakePlatform;
 
-    expect(await datatransPluginFlutterPlugin.getPlatformVersion(), '42');
+    expect(await datatransPluginFlutterPlugin.initializeTransaction(), '42');
   });
 }

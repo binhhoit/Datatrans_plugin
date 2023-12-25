@@ -33,7 +33,7 @@ class _MyAppState extends State<MyApp> {
     // We also handle the message potentially returning null.
     try {
       platformVersion =
-          await _datatransPluginFlutterPlugin.getPlatformVersion() ?? 'Unknown platform version';
+          await _datatransPluginFlutterPlugin.initializeTransaction() ?? 'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
