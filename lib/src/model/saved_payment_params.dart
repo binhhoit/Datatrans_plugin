@@ -5,10 +5,12 @@ part 'saved_payment_params.g.dart';
 
 class SavedPaymentParams {
   final SavedPaymentInfo _paymentInfo;
+  final String alias;
+  final PaymentMethodType paymentMethod;
 
   SavedPaymentParams(
-      {required String alias,
-       required PaymentMethodType paymentMethod}) : 
+      {required this.alias,
+       required this.paymentMethod}) : 
         _paymentInfo = SavedPaymentInfo(
           alias: alias,
           paymentMethod: paymentMethod.rawValue,

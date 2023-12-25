@@ -35,7 +35,9 @@ class _MyAppState extends State<MyApp> {
 class Home extends StatelessWidget {
   final DatatransPluginFlutter _datatransFlutterPlugin;
 
-  const Home(DatatransPluginFlutter datatransFlutterPlugin, {super.key}) : _datatransFlutterPlugin = datatransFlutterPlugin;
+  SavedPaymentParams? _savedPaymentParams;
+
+  Home(DatatransPluginFlutter datatransFlutterPlugin, {super.key}) : _datatransFlutterPlugin = datatransFlutterPlugin;
 
   @override
   Widget build(BuildContext context) {
@@ -44,24 +46,50 @@ class Home extends StatelessWidget {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: ElevatedButton(
-            child: const Text('Charge payment'),
-            onPressed: () async {
-              var params = PaymentParams(
-                amount: 1000,
-                currency: "USD",
-                paymentMethods: [
-                  PaymentMethodType.masterCard,
-                  PaymentMethodType.visa,
-                  PaymentMethodType.jcb,
-                  PaymentMethodType.paypal,
-                  PaymentMethodType.americanExpress
-                ]);
-              var success = await _datatransFlutterPlugin.payment(params: params);
-              if (success?.success ?? false) {
-                _showMyDialog(context, success?.success ?? false);
-              }
-            },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                child: const Text('Charge payment'),
+                onPressed: () async {
+                  var params = PaymentParams(
+                    amount: 1000,
+                    currency: "USD",
+                    paymentMethods: [
+                      PaymentMethodType.masterCard,
+                      PaymentMethodType.visa,
+                      PaymentMethodType.jcb,
+                      PaymentMethodType.paypal,
+                      PaymentMethodType.americanExpress
+                    ]);
+                  var success = await _datatransFlutterPlugin.payment(params: params);
+                  if (success?.success ?? false) {
+                    _showMyDialog(context, success?.success ?? false);
+                  }
+                },
+              ),
+              const SizedBox(height: 50,),
+              ElevatedButton(
+                child: const Text('Charge fast payment'),
+                onPressed: () async {
+                  var params = PaymentParams(
+                    amount: 10000,
+                    currency: "USD",
+                    paymentMethods: _savedPaymentParams != null ? [_savedPaymentParams!.paymentMethod] : []);
+
+                  if (_savedPaymentParams != null) {
+                    var saveParams = SavedPaymentParams(
+                      alias: _savedPaymentParams!.alias, 
+                      paymentMethod: _savedPaymentParams!.paymentMethod
+                    );
+                    var success = await _datatransFlutterPlugin.fastPayment(params: params, saveParams: saveParams);
+                    if (success?.success ?? false) {
+                      _showMyDialog(context, success?.success ?? false);
+                    }
+                  }
+                },
+              ),
+            ],
           ),
         ),
       );
