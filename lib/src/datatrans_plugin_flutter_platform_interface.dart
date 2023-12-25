@@ -1,4 +1,4 @@
-import 'package:datatrans_plugin_flutter/src/model/payment_card_info.dart';
+import 'package:datatrans_plugin_flutter/src/model/datatrans_base_response.dart';
 import 'package:datatrans_plugin_flutter/src/model/payment_params.dart';
 import 'package:datatrans_plugin_flutter/src/model/saved_payment_params.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
@@ -19,8 +19,7 @@ abstract class DatatransPluginFlutterPlatform extends PlatformInterface {
   }
 
   void initialize(String merchantId, String password);
-  Future<bool> saveCardPaymentInfo();
-  Future<List<PaymentCardInfo>?> getAllPaymentAlias();
-  Future<bool> payment(PaymentParams params);
-  Future<bool> fastPayment(SavedPaymentParams params);
+  Future<DatatransResponse<void>?> saveCardPaymentInfo();
+  Future<DatatransResponse<SavedPaymentParams>?> payment(PaymentParams params);
+  Future<DatatransResponse<SavedPaymentParams>?> fastPayment(PaymentParams params, SavedPaymentParams saveParams);
 }

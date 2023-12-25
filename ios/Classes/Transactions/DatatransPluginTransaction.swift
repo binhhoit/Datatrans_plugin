@@ -14,4 +14,5 @@ protocol DatatransPluginTransaction {
     
     func configure(params: TransactionInitializeParams)
     func payment(params: TransactionParams)
+    func fastPayment(params: TransactionParams, savePaymentMethod: PaymentMethod)
 }
