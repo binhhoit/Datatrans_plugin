@@ -17,6 +17,6 @@ abstract class DatatransPluginFlutterPlatform extends PlatformInterface {
   }
 
   void initialize(String merchantId, String password);
-  Future<bool?> saveCardPaymentInfo();
-  Future<bool?> payment(PaymentParams params);
+  Future<bool> saveCardPaymentInfo();
+  Future<bool> payment(PaymentParams params);
 }

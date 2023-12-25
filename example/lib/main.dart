@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:datatrans_plugin_flutter/datatrans_flutter.dart';
@@ -19,32 +20,74 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _datatransFlutterPlugin.initialize("", "");
+    _datatransFlutterPlugin.initialize("1110015614", "NvhOGev4xmiWesTg");
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
+      debugShowCheckedModeBanner: false,
+      home: Home(_datatransFlutterPlugin),
+    );
+  }
+}
+
+class Home extends StatelessWidget {
+  final DatatransPluginFlutter _datatransFlutterPlugin;
+
+  const Home(DatatransPluginFlutter datatransFlutterPlugin, {super.key}) : _datatransFlutterPlugin = datatransFlutterPlugin;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: InkWell(
-            onTap:() {
+          child: ElevatedButton(
+            child: const Text('Charge payment'),
+            onPressed: () async {
               var params = PaymentParams(
-                amount: 1000, 
-                currency: "USD", 
+                amount: 1000,
+                currency: "USD",
                 paymentMethods: [
                   PaymentMethodType.masterCard.rawValue,
                   PaymentMethodType.visa.rawValue
                 ]);
-              _datatransFlutterPlugin.payment(params: params);
+              var success = await _datatransFlutterPlugin.payment(params: params);
+              if (success) {
+                _showMyDialog(context, success);
+              }
             },
-            child: const Text('Charge payment'),
           ),
         ),
-      ),
+      );
+  }
+
+  void _showMyDialog(BuildContext context, bool success) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Payment'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Payment is ${success ? 'successed' : 'not successed'}'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

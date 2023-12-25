@@ -21,17 +21,17 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
   }
 
   @override
-  Future<bool?> saveCardPaymentInfo() async {
+  Future<bool> saveCardPaymentInfo() async {
     var methodName = DatatransMethodIdentity.saveCardPaymentInfo.methodName;
     final success = await methodChannel.invokeMethod<bool>(methodName);
-    return success;
+    return success ?? false;
   }
 
   @override
-  Future<bool?> payment(PaymentParams params) async {
+  Future<bool> payment(PaymentParams params) async {
     var methodName = DatatransMethodIdentity.payment.methodName;
     var dict = params.toJson();
     final success = await methodChannel.invokeMethod<bool>(methodName, dict);
-    return success;
+    return success ?? false;
   }
 }

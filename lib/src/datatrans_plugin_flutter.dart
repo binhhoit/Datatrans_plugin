@@ -7,11 +7,11 @@ class DatatransPluginFlutter {
     DatatransPluginFlutterPlatform.instance.initialize(merchantId, password);
   }
 
-  Future<bool?> saveCardPaymentInfo() async {
+  Future<bool> saveCardPaymentInfo() async {
     return DatatransPluginFlutterPlatform.instance.saveCardPaymentInfo();
   }
 
-  Future<bool?> payment({required PaymentParams params}) async {
+  Future<bool> payment({required PaymentParams params}) async {
     return DatatransPluginFlutterPlatform.instance.payment(params);
   }
 }

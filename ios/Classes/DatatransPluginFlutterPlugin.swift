@@ -2,6 +2,8 @@ import Flutter
 import UIKit
 
 public class DatatransFlutterPlugin: NSObject, FlutterPlugin {
+    private var transaction: DatatransPluginTransaction = DatatransPluginTransactionImpl()
+    
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "datatrans_plugin_flutter", binaryMessenger: registrar.messenger())
         let instance = DatatransFlutterPlugin()
@@ -9,17 +11,22 @@ public class DatatransFlutterPlugin: NSObject, FlutterPlugin {
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let identity = MethodIdentity(rawValue: call.method) 
+        guard let data = call.arguments as? [String: Any] else {
+            return
+        }
+        
+        let identity = MethodIdentity(rawValue: call.method)
         switch identity {
         case .initialize:
-            guard let data = call.arguments as? [String: Any] else {
-                return
-            }
             let params = TransactionInitializeParams(dict: data)
-            DatatransPluginTransaction.instance.configure(merchantId: params.merchantId, password: params.password)
-        case .saveCardPaymentInfo:
-            return
+            transaction.configure(params: params)
         case .payment:
+            let params = TransactionParams(dict: data)
+            transaction.paymentCompletion = { isSuccess in
+                result(isSuccess)
+            }
+            transaction.payment(params: params)
+        case .saveCardPaymentInfo:
             return
         default:
             result(FlutterMethodNotImplemented)
