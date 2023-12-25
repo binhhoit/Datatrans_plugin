@@ -39,7 +39,7 @@ flutter:
     platforms:
       android:
         package: com.sts.datatrans_plugin_flutter
-        pluginClass: DatatransPluginFlutterPlugin
+        pluginClass: DatatransFlutterPlugin
       ios:
         pluginClass: DatatransFlutterPlugin
 
