@@ -2,10 +2,7 @@ package com.sts.datatrans_plugin_flutter
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.lifecycleScope
 import ch.datatrans.payment.api.Transaction
 import ch.datatrans.payment.api.TransactionListener
@@ -14,6 +11,7 @@ import ch.datatrans.payment.api.TransactionSuccess
 import ch.datatrans.payment.exception.TransactionException
 import com.google.gson.Gson
 import com.sts.datatrans_plugin_flutter.data.model.DatatransRequest
+import com.sts.datatrans_plugin_flutter.data.model.ResultResponsePayment
 import com.sts.datatrans_plugin_flutter.data.repository.DatatransRepository
 import com.sts.datatrans_plugin_flutter.util.encode
 import io.flutter.embedding.android.FlutterFragmentActivity
@@ -24,19 +22,10 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.PluginRegistry.ActivityResultListener
-import io.flutter.plugin.common.PluginRegistry.NewIntentListener
-import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener
 import kotlinx.coroutines.launch
-import okio.ByteString.Companion.decodeBase64
-import java.lang.Exception
-import kotlin.jvm.Throws
 
 /** DatatransFlutterPlugin */
-class DatatransFlutterPlugin :
-    MethodCallHandler,
-    FlutterPlugin,
-    ActivityAware {
+class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
 
     companion object {
         const val TAG = "DatatransPlugin"
@@ -53,7 +42,7 @@ class DatatransFlutterPlugin :
     private var tokenPayment: String? = null
 
     init {
-        Log.e(TAG, "init")
+        Log.d(TAG, "init")
         repository = DatatransRepository()
     }
 
@@ -65,33 +54,30 @@ class DatatransFlutterPlugin :
             options.appCallbackScheme = "app.datatrans.flutter"
             listener = object : TransactionListener {
                 override fun onTransactionError(exception: TransactionException) {
-                    this@DatatransFlutterPlugin.result?.error(
-                        "400",
-                        "Payment error",
-                        exception)
+                    result?.success(ResultResponsePayment(false,"Payment error", exception))
                 }
 
                 override fun onTransactionSuccess(result: TransactionSuccess) {
-                    this@DatatransFlutterPlugin.result?.success(result)
+                    this@DatatransFlutterPlugin.result?.success(ResultResponsePayment(true,null, Gson().toJson(result)))
                 }
             }
             options.isTesting = true
             options.useCertificatePinning = false
             options.suppressCriticalErrorDialog = true
             if (activity == null) {
-                result?.error("400", "null activity", null)
+                result?.success(ResultResponsePayment(false,"not found activity", null))
             } else {
                 TransactionRegistry.startTransaction(activity!!, transaction)
             }
         }
-        Log.e(TAG, "install")
+        Log.d(TAG, "install")
     }
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, NAME)
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
-        Log.e(TAG, "onAttachedToEngine")
+        Log.d(TAG, "onAttachedToEngine")
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -122,19 +108,19 @@ class DatatransFlutterPlugin :
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activity = binding.activity
-        Log.e(TAG, "onAttachedToActivity")
+        Log.d(TAG, "onAttachedToActivity")
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
-        Log.e(TAG, "Detached")
+        Log.d(TAG, "Detached")
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-        Log.e(TAG, "Reattached")
+        Log.d(TAG, "Reattached")
     }
 
     override fun onDetachedFromActivity() {
-        Log.e(TAG, "Detached")
+        Log.d(TAG, "Detached")
     }
 
     private fun getTokenMobile(arguments: Any) {
@@ -143,13 +129,13 @@ class DatatransFlutterPlugin :
                 val rawData = Gson().fromJson(arguments.toString(), DatatransRequest::class.java)
                 val request = DatatransRequest(rawData.currency, rawData.amount, rawData.paymentMethods)
                 if(authorization==null)
-                    result?.error("401", "authorization not success", null)
+                    result?.success(ResultResponsePayment(false,"authorization not success", null))
                 repository.getToken(authorization!!,request).apply {
                     if (isSuccessful) {
                         tokenPayment = this.body()?.mobileToken ?: ""
                         initSDKDataTransaction()
                     } else {
-                        result?.success("can't get token payment")
+                        result?.success(ResultResponsePayment(false,"can't get token payment", null))
                     }
                 }
             }

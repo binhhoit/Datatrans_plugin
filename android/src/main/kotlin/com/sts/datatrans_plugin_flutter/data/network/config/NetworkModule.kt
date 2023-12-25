@@ -1,5 +1,6 @@
 package com.sts.datatrans_plugin_flutter.data.network.config
 
+import com.sts.datatrans_plugin_flutter.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -12,7 +13,12 @@ object NetworkModule {
 
     private fun getHttpLoggingInterceptor(): HttpLoggingInterceptor {
         val interceptor = HttpLoggingInterceptor()
-        interceptor.level = HttpLoggingInterceptor.Level.BODY
+        interceptor.level =
+            if (BuildConfig.DEBUG)
+                HttpLoggingInterceptor.Level.BODY
+            else
+                HttpLoggingInterceptor.Level.NONE
+
         return interceptor
     }
 
