@@ -17,11 +17,12 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
-  final _datatransPluginFlutterPlugin = DatatransPluginFlutter();
+  late DatatransPluginFlutter _datatransPluginFlutterPlugin;
 
   @override
   void initState() {
     super.initState();
+    _datatransPluginFlutterPlugin = DatatransPluginFlutter();
     initPlatformState();
   }
 

@@ -1,5 +1,6 @@
 package com.sts.datatrans_plugin_flutter
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -18,9 +19,11 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.ActivityResultListener
 import io.flutter.plugin.common.PluginRegistry.NewIntentListener
 import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener
+import java.lang.Exception
 
 /** DatatransPluginFlutterPlugin */
-class DatatransPluginFlutterPlugin : MethodCallHandler,
+class DatatransPluginFlutterPlugin :
+    MethodCallHandler,
     NewIntentListener,
     RequestPermissionsResultListener,
     ActivityResultListener,
@@ -28,41 +31,56 @@ class DatatransPluginFlutterPlugin : MethodCallHandler,
     ActivityAware {
 
     companion object {
-        const val TOKEN_MOBILE = "d065e4d4261c6f4c9fac7b92c373976c0335774464a25674";
+        const val TOKEN_MOBILE = "770a6711dd257da0dcce5cb706f9e417033579f11c538098"
+        const val TAG = "DatatransPlugin"
+        const val NAME ="datatrans_plugin_flutter"
     }
 
-    private lateinit var context:Context
+    private lateinit var context: Context
+    private var activity: Activity? =null
     private lateinit var channel: MethodChannel
-    private val transaction = Transaction(TOKEN_MOBILE)
-
+    private lateinit var transaction: Transaction
 
     init {
+        Log.e(TAG, "init")
+    }
+
+    private fun initSDKDataTransaction() {
+        transaction = Transaction(TOKEN_MOBILE)
         transaction.apply {
-            options.appCallbackScheme = "com.sts.datatrans_plugin_flutter_example"
-            listener = object :TransactionListener {
+            //options.appCallbackScheme = "https://sts.com"
+            listener = object : TransactionListener {
                 override fun onTransactionError(exception: TransactionException) {
-                   exception.printStackTrace()
+                    exception.printStackTrace()
                 }
 
                 override fun onTransactionSuccess(result: TransactionSuccess) {
-                   result.transactionId
+                    result.transactionId
                 }
             }
             options.isTesting = true
             options.useCertificatePinning = false
             options.suppressCriticalErrorDialog = true
+            if (activity == null) {
+                throw Exception("null activity")
+            } else {
+                TransactionRegistry.startTransaction(activity!!, transaction)
+            }
         }
+        Log.e(TAG, "install")
     }
 
-
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "datatrans_plugin_flutter")
+        channel = MethodChannel(flutterPluginBinding.binaryMessenger, NAME)
         channel.setMethodCallHandler(this)
+        context = flutterPluginBinding.applicationContext
+        Log.e(TAG, "onAttachedToEngine")
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
-        if (call.method == "getPlatformVersion") {
+        if (call.method == "initializeTransaction") {
             result.success("Android ${android.os.Build.VERSION.RELEASE}")
+            initSDKDataTransaction()
         } else {
             result.notImplemented()
         }
@@ -73,8 +91,8 @@ class DatatransPluginFlutterPlugin : MethodCallHandler,
     }
 
     override fun onNewIntent(intent: Intent): Boolean {
-      Log.e("activity", "onNewIntent")
-      return true
+        Log.e(TAG, "onNewIntent")
+        return true
     }
 
     override fun onRequestPermissionsResult(
@@ -82,31 +100,27 @@ class DatatransPluginFlutterPlugin : MethodCallHandler,
         permissions: Array<out String>,
         grantResults: IntArray,
     ): Boolean {
-        TODO("Not yet implemented")
+        return true
     }
 
-    override fun onActivityResult(
-        requestCode: Int,
-        resultCode: Int,
-        data: Intent?,
-    ): Boolean {
-        TODO("Not yet implemented")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
+        return true
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-      context = binding.activity
-      TransactionRegistry.startTransaction(binding.activity, transaction)
+        activity = binding.activity
+        Log.e(TAG, "onAttachedToActivity")
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
-       Log.e("activity", "Detached")
+        Log.e(TAG, "Detached")
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-      Log.e("activity", "Reattached")
+        Log.e(TAG, "Reattached")
     }
 
     override fun onDetachedFromActivity() {
-      Log.e("activity", "Detached")
+        Log.e(TAG, "Detached")
     }
 }
