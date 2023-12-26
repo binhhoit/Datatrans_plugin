@@ -64,13 +64,11 @@ class Home extends StatelessWidget {
                       PaymentMethodType.americanExpress
                     ]);
                   var result = await _datatransFlutterPlugin.payment(params: params);
-                  print(result?.data.toString());
-                  if (result?.success != true) {
-                  _showMyDialog(context, result?.success ?? false, error: result?.error ?? "");
-                } else {
-                  _savedPaymentParams = result?.data;
-                }
-              },
+                  _showMyDialog(context, result?.success ?? false, error: result?.error);
+                  if (result?.success == true) {
+                    _savedPaymentParams = result?.data;
+                  }
+                },
               ),
               const SizedBox(height: 50,),
               ElevatedButton(
@@ -83,10 +81,8 @@ class Home extends StatelessWidget {
                     paymentMethods: _savedPaymentParams != null ? [_savedPaymentParams!.paymentMethod] : []);
 
                   if (_savedPaymentParams != null) {
-                    var success = await _datatransFlutterPlugin.fastPayment(params: params, saveParams: _savedPaymentParams!);
-                    if (success?.success != true) {
-                      _showMyDialog(context, success?.success ?? false);
-                    }
+                    var result = await _datatransFlutterPlugin.fastPayment(params: params, saveParams: _savedPaymentParams!);
+                    _showMyDialog(context, result?.success ?? false, error: result?.error);
                   }
                 },
               ),
@@ -96,7 +92,7 @@ class Home extends StatelessWidget {
       );
   }
 
-  void _showMyDialog(BuildContext context, bool success, {String? error = null}) {
+  void _showMyDialog(BuildContext context, bool success, {String? error}) {
     showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
