@@ -21,18 +21,28 @@ public class DatatransFlutterPlugin: NSObject, FlutterPlugin {
             let params = TransactionInitializeParams(dict: data)
             transaction.configure(params: params)
         case .payment:
-            let params = TransactionParams(dict: data)
-            transaction.paymentCompletion = { isSuccess in
-                result(isSuccess)
+            let request = BaseRequest(dict: data)
+            guard let request = request else {
+                result(BaseReponse.commonErrorResponse)
+                return
             }
-            transaction.payment(params: params)
-        case .saveCardPaymentInfo:
-            let params = TransactionParams(dict: data)
-            let paymentMethod = PaymentMethod(methodType: .MasterCard, alias: "")
-            transaction.paymentCompletion = { isSuccess in
-                result(isSuccess)
+            
+            transaction.paymentCompletion = { response in
+                result(response.toJson)
             }
-            transaction.fastPayment(params: params, savePaymentMethod: paymentMethod)
+            transaction.payment(params: request.payment)
+        case .fastPayment:
+            let request = BaseRequest(dict: data)
+            guard let request = request,
+                  let savePaymentMethod = request.paymentMethod else {
+                result(BaseReponse.commonErrorResponse)
+                return
+            }
+            
+            transaction.paymentCompletion = { response in
+                result(response.toJson)
+            }
+            transaction.fastPayment(params: request.payment, savePaymentMethod: savePaymentMethod)
             return
         default:
             result(FlutterMethodNotImplemented)

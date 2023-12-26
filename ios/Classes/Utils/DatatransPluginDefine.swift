@@ -15,4 +15,5 @@ enum MethodIdentity: String {
     case initialize = "initialize"
     case saveCardPaymentInfo = "saveCardPaymentInfo"
     case payment = "payment"
+    case fastPayment = "fastPayment"
 }

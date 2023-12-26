@@ -10,7 +10,7 @@ import Alamofire
 import Datatrans
 
 protocol DatatransPluginTransaction {
-    var paymentCompletion: ((Bool) -> Void)? { get set }
+    var paymentCompletion: ((BaseReponse) -> Void)? { get set }
     
     func configure(params: TransactionInitializeParams)
     func payment(params: TransactionParams)

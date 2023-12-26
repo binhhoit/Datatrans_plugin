@@ -11,7 +11,7 @@ import Alamofire
 
 class DatatransPluginTransactionImpl: DatatransPluginTransaction {
     private var hashBasicToken: String = ""
-    internal var paymentCompletion: ((Bool) -> Void)?
+    internal var paymentCompletion: ((BaseReponse) -> Void)?
     
     func configure(params: TransactionInitializeParams) {
         guard let credentialData = "\(params.merchantId):\(params.password)".data(using: String.Encoding.utf8) else {
@@ -25,7 +25,9 @@ class DatatransPluginTransactionImpl: DatatransPluginTransaction {
         requestTransaction(parameters: params.toParams()) { [weak self] dict in
             guard let dict = dict,
                   let mobileToken = dict["mobileToken"] as? String else {
-                self?.paymentCompletion?(false)
+                self?.paymentCompletion?(
+                    BaseReponse(error: "Can not create transaction", success: false, data: nil)
+                )
                 return
             }
             self?.startTransaction(mobileToken: mobileToken)
@@ -36,7 +38,9 @@ class DatatransPluginTransactionImpl: DatatransPluginTransaction {
         requestTransaction(parameters: params.toParams()) { [weak self] dict in
             guard let dict = dict,
                   let mobileToken = dict["mobileToken"] as? String else {
-                self?.paymentCompletion?(false)
+                self?.paymentCompletion?(
+                    BaseReponse(error: "Can not create transaction", success: false, data: nil)
+                )
                 return
             }
             self?.startTransaction(mobileToken: mobileToken, savePaymentMethod: savePaymentMethod.savePayment)
@@ -78,6 +82,7 @@ extension DatatransPluginTransactionImpl {
         }
         transaction.delegate = self
         transaction.options.testing = true
+        transaction.options.savedCardDCCShowMode = .smart
         transaction.options.useCertificatePinning = true
         transaction.options.appCallbackScheme = "app.datatrans.flutter"
         
@@ -89,12 +94,25 @@ extension DatatransPluginTransactionImpl {
     }
 }
 
+// MARK: - TransactionDelegate
 extension DatatransPluginTransactionImpl: TransactionDelegate {
     func transactionDidFinish(_ transaction: Datatrans.Transaction, result: Datatrans.TransactionSuccess) {
-        paymentCompletion?(true)
+        guard let saveMethod = result.savedPaymentMethod as? SavedCard else {
+            paymentCompletion?(
+                BaseReponse(success: true, data: nil)
+            )
+            return
+        }
+        
+        let savePayment = PaymentMethod(savePayment: saveMethod)
+        paymentCompletion?(
+            BaseReponse(success: true, data: savePayment.toDict())
+        )
     }
     
     func transactionDidFail(_ transaction: Datatrans.Transaction, error: Datatrans.TransactionError) {
-        paymentCompletion?(false)
+        paymentCompletion?(
+            BaseReponse(error: error.backendError?.name ?? error.localizedDescription, success: false, data: nil)
+        )
     }
 }
