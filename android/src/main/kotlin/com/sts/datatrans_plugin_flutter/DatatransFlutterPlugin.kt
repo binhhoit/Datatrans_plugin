@@ -9,9 +9,13 @@ import ch.datatrans.payment.api.TransactionListener
 import ch.datatrans.payment.api.TransactionRegistry
 import ch.datatrans.payment.api.TransactionSuccess
 import ch.datatrans.payment.exception.TransactionException
+import ch.datatrans.payment.paymentmethods.SavedCard
+import ch.datatrans.payment.paymentmethods.SavedPaymentMethod
 import com.google.gson.Gson
 import com.sts.datatrans_plugin_flutter.data.model.DatatransRequest
+import com.sts.datatrans_plugin_flutter.data.model.ExpiredDate
 import com.sts.datatrans_plugin_flutter.data.model.ResultResponsePayment
+import com.sts.datatrans_plugin_flutter.data.model.SaveCardPayment
 import com.sts.datatrans_plugin_flutter.data.repository.DatatransRepository
 import com.sts.datatrans_plugin_flutter.util.encode
 import io.flutter.embedding.android.FlutterFragmentActivity
@@ -22,7 +26,9 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.plugin.common.StandardMessageCodec
 import kotlinx.coroutines.launch
+import java.lang.Exception
 
 /** DatatransFlutterPlugin */
 class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
@@ -46,26 +52,47 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
         repository = DatatransRepository()
     }
 
-    private fun initSDKDataTransaction() {
+    private fun initSDKDataTransaction(savedPaymentMethod: SavedPaymentMethod? = null) {
         if (tokenPayment == null)
             return
-        transaction = Transaction(tokenPayment!!)
+        transaction =
+            if (savedPaymentMethod != null)
+                Transaction(tokenPayment!!, savedPaymentMethod)
+            else Transaction(tokenPayment!!)
+
         transaction.apply {
             options.appCallbackScheme = "app.datatrans.flutter"
             listener = object : TransactionListener {
                 override fun onTransactionError(exception: TransactionException) {
-                    result?.success(ResultResponsePayment(false,"Payment error", exception))
+                    exception.printStackTrace()
+                    result?.success(ResultResponsePayment(false,exception.message, null).toJson())
                 }
 
                 override fun onTransactionSuccess(result: TransactionSuccess) {
-                    this@DatatransFlutterPlugin.result?.success(ResultResponsePayment(true,null, Gson().toJson(result)))
+
+                    val data = (result.savedPaymentMethod as SavedCard).let {
+                        SaveCardPayment(it.alias,
+                            it.maskedCardNumber ?: "",
+                            it.cardholder ?: "",
+                            ExpiredDate(it.cardExpiryDate?.month ?: 0,
+                                it.cardExpiryDate?.year ?: 0),
+                            it.type.identifier
+                        )
+                    }
+
+                    this@DatatransFlutterPlugin.result?.success(
+                        ResultResponsePayment(
+                            true,
+                            null,
+                            data,
+                        ).toJson())
                 }
             }
             options.isTesting = true
             options.useCertificatePinning = false
             options.suppressCriticalErrorDialog = true
             if (activity == null) {
-                result?.success(ResultResponsePayment(false,"not found activity", null))
+                result?.success(ResultResponsePayment(false,"not found activity", null).toJson())
             } else {
                 TransactionRegistry.startTransaction(activity!!, transaction)
             }
@@ -127,15 +154,24 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
         (activity as FlutterFragmentActivity).apply {
             lifecycleScope.launch {
                 val rawData = Gson().fromJson(arguments.toString(), DatatransRequest::class.java)
-                val request = DatatransRequest(rawData.currency, rawData.amount, rawData.paymentMethods)
+                val request = DatatransRequest(
+                    rawData.currency,
+                    rawData.amount,
+                    rawData.autoSettle,
+                    rawData.paymentMethods,
+                ).apply {
+                    isSaveAlias = rawData.isSaveAlias
+                }
                 if(authorization==null)
-                    result?.success(ResultResponsePayment(false,"authorization not success", null))
+                    result?.success(ResultResponsePayment(false,"authorization not success", null).toJson())
                 repository.getToken(authorization!!,request).apply {
                     if (isSuccessful) {
                         tokenPayment = this.body()?.mobileToken ?: ""
+                        val savedPaymentMethod = Gson().fromJson(arguments.toString(), SavedPaymentMethod::class.java)
+                        Log.e(TAG,savedPaymentMethod.toJson())
                         initSDKDataTransaction()
                     } else {
-                        result?.success(ResultResponsePayment(false,"can't get token payment", null))
+                        result?.success(ResultResponsePayment(false,"can't get token payment", null).toJson())
                     }
                 }
             }

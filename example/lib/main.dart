@@ -64,11 +64,13 @@ class Home extends StatelessWidget {
                       PaymentMethodType.americanExpress
                     ]);
                   var result = await _datatransFlutterPlugin.payment(params: params);
+                  print(result?.data.toString());
                   if (result?.success != true) {
-                    _savedPaymentParams = result?.data;
-                    _showMyDialog(context, result?.success ?? false, error: result?.error ?? "");
-                  }
-                },
+                  _showMyDialog(context, result?.success ?? false, error: result?.error ?? "");
+                } else {
+                  _savedPaymentParams = result?.data;
+                }
+              },
               ),
               const SizedBox(height: 50,),
               ElevatedButton(
