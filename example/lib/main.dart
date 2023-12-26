@@ -63,10 +63,10 @@ class Home extends StatelessWidget {
                       PaymentMethodType.paypal,
                       PaymentMethodType.americanExpress
                     ]);
-                  var success = await _datatransFlutterPlugin.payment(params: params);
-                  if (success?.success ?? false) {
-                    _savedPaymentParams = success?.data;
-                    _showMyDialog(context, success?.success ?? false);
+                  var result = await _datatransFlutterPlugin.payment(params: params);
+                  if (result?.success != true) {
+                    _savedPaymentParams = result?.data;
+                    _showMyDialog(context, result?.success ?? false, error: result?.error ?? "");
                   }
                 },
               ),
@@ -82,7 +82,7 @@ class Home extends StatelessWidget {
 
                   if (_savedPaymentParams != null) {
                     var success = await _datatransFlutterPlugin.fastPayment(params: params, saveParams: _savedPaymentParams!);
-                    if (success?.success ?? false) {
+                    if (success?.success != true) {
                       _showMyDialog(context, success?.success ?? false);
                     }
                   }
@@ -94,7 +94,7 @@ class Home extends StatelessWidget {
       );
   }
 
-  void _showMyDialog(BuildContext context, bool success) {
+  void _showMyDialog(BuildContext context, bool success, {String? error = null}) {
     showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -105,6 +105,7 @@ class Home extends StatelessWidget {
             child: ListBody(
               children: <Widget>[
                 Text('Payment is ${success ? 'successed' : 'not successed'}'),
+                if (error != null) Text(error),
               ],
             ),
           ),

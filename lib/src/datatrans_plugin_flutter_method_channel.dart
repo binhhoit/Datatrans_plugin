@@ -60,9 +60,9 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
           (e) => SavedPaymentParams.fromJson(e as Map<String, dynamic>));
         return response;
       }
-      return null;
+      return DatatransResponse(error: "result empty", success: false, data: null);
     } catch (e) {
-      return null;
+      return DatatransResponse(error: e.toString() , success: false, data: null);
     }
   }
   
@@ -82,9 +82,9 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
           (e) => SavedPaymentParams.fromJson(e as Map<String, dynamic>));
         return response;
       }
-      return null;
+      return DatatransResponse(error: "result empty", success: false, data: null);
     } catch (e) {
-      return null;
+      return DatatransResponse(error: e.toString() , success: false, data: null);
     }
   }
 }
