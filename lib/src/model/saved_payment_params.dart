@@ -27,6 +27,7 @@ class SavedPaymentParams {
       alias: savedPayment.alias,
       cardNumber: savedPayment.cardNumber,
       cardHolder: savedPayment.cardHolder,
+      expiredDate: savedPayment.expiredDate,
       paymentMethod: PaymentMethodTypeExtension.fromRawValue(savedPayment.paymentMethod));
   }
 

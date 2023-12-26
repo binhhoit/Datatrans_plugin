@@ -23,6 +23,6 @@ Map<String, dynamic> _$SavedPaymentInfoToJson(SavedPaymentInfo instance) =>
       'alias': instance.alias,
       'cardNumber': instance.cardNumber,
       'cardHolder': instance.cardHolder,
-      'expiredDate': instance.expiredDate,
+      'expiredDate': instance.expiredDate?.toJson(),
       'paymentMethod': instance.paymentMethod,
     };

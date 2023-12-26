@@ -75,8 +75,9 @@ class Home extends StatelessWidget {
                 child: const Text('Charge fast payment'),
                 onPressed: () async {
                   var params = PaymentParams(
-                    amount: 10000,
+                    amount: 100,
                     currency: "USD",
+                    autoSettle: true,
                     paymentMethods: _savedPaymentParams != null ? [_savedPaymentParams!.paymentMethod] : []);
 
                   if (_savedPaymentParams != null) {
