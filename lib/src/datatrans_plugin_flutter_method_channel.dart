@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:core';
+import 'package:datatrans_plugin_flutter/src/model/datatrans_base_request.dart';
 import 'package:datatrans_plugin_flutter/src/model/datatrans_base_response.dart';
 import 'package:datatrans_plugin_flutter/src/model/saved_payment_params.dart';
 import 'package:flutter/foundation.dart';
@@ -50,9 +51,11 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
   @override
   Future<DatatransResponse<SavedPaymentParams>?> payment(PaymentParams params) async {
     var methodName = DatatransMethodIdentity.payment.methodName;
-    var dict = params.toJson();
+    var request = DatatransRequest(
+      payment: params.toJson()
+    );
     try {
-      final results = await methodChannel.invokeMethod<String>(methodName, dict);
+      final results = await methodChannel.invokeMethod<String>(methodName, request.toJson());
       if (results != null) {
         Map<String, dynamic> valueMap = json.decode(results);
         var response = DatatransResponse<SavedPaymentParams>.fromJson(
@@ -69,12 +72,12 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
   @override
   Future<DatatransResponse<SavedPaymentParams>?> fastPayment(PaymentParams params, SavedPaymentParams saveParams) async {
     var methodName = DatatransMethodIdentity.fastPayment.methodName;
-    var dict = {
-      "payment" : params.toJson(), 
-      "cards": saveParams.toJson()
-    };
+    var request = DatatransRequest(
+      payment: params.toJson(), 
+      cards: saveParams.toJson()
+    );
     try {
-      final results = await methodChannel.invokeMethod<String>(methodName, dict);
+      final results = await methodChannel.invokeMethod<String>(methodName, request.toJson());
       if (results != null) {
         Map<String, dynamic> valueMap = json.decode(results);
         var response = DatatransResponse<SavedPaymentParams>.fromJson(
