@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:core';
 import 'package:datatrans_plugin_flutter/src/model/datatrans_base_response.dart';
 import 'package:datatrans_plugin_flutter/src/model/saved_payment_params.dart';
@@ -51,10 +52,11 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
     var methodName = DatatransMethodIdentity.payment.methodName;
     var dict = params.toJson();
     try {
-      final results = await methodChannel.invokeMethod<Map<String, dynamic>>(methodName, dict);
+      final results = await methodChannel.invokeMethod<String>(methodName, dict);
       if (results != null) {
+        Map<String, dynamic> valueMap = json.decode(results);
         var response = DatatransResponse<SavedPaymentParams>.fromJson(
-          results,
+          valueMap,
           (e) => SavedPaymentParams.fromJson(e as Map<String, dynamic>));
         return response;
       }
@@ -72,10 +74,11 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
       "cards": saveParams.toJson()
     };
     try {
-      final results = await methodChannel.invokeMethod<Map<String, dynamic>>(methodName, dict);
+      final results = await methodChannel.invokeMethod<String>(methodName, dict);
       if (results != null) {
+        Map<String, dynamic> valueMap = json.decode(results);
         var response = DatatransResponse<SavedPaymentParams>.fromJson(
-          results,
+          valueMap,
           (e) => SavedPaymentParams.fromJson(e as Map<String, dynamic>));
         return response;
       }

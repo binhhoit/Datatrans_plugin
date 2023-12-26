@@ -55,6 +55,7 @@ class Home extends StatelessWidget {
                   var params = PaymentParams(
                     amount: 1000,
                     currency: "USD",
+                    saveAlias: true,
                     paymentMethods: [
                       PaymentMethodType.masterCard,
                       PaymentMethodType.visa,
@@ -64,6 +65,7 @@ class Home extends StatelessWidget {
                     ]);
                   var success = await _datatransFlutterPlugin.payment(params: params);
                   if (success?.success ?? false) {
+                    _savedPaymentParams = success?.data;
                     _showMyDialog(context, success?.success ?? false);
                   }
                 },
@@ -78,11 +80,7 @@ class Home extends StatelessWidget {
                     paymentMethods: _savedPaymentParams != null ? [_savedPaymentParams!.paymentMethod] : []);
 
                   if (_savedPaymentParams != null) {
-                    var saveParams = SavedPaymentParams(
-                      alias: _savedPaymentParams!.alias, 
-                      paymentMethod: _savedPaymentParams!.paymentMethod
-                    );
-                    var success = await _datatransFlutterPlugin.fastPayment(params: params, saveParams: saveParams);
+                    var success = await _datatransFlutterPlugin.fastPayment(params: params, saveParams: _savedPaymentParams!);
                     if (success?.success ?? false) {
                       _showMyDialog(context, success?.success ?? false);
                     }
