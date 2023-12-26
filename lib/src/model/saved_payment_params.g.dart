@@ -11,10 +11,7 @@ SavedPaymentInfo _$SavedPaymentInfoFromJson(Map<String, dynamic> json) =>
       alias: json['alias'] as String,
       cardNumber: json['cardNumber'] as String,
       cardHolder: json['cardHolder'] as String?,
-      expiredDate: json['expiredDate'] == null
-          ? null
-          : CardExpiredDate.fromJson(
-              json['expiredDate'] as Map<String, dynamic>),
+      expiredDate: json['expiredDate'] as Map<String, dynamic>?,
       paymentMethod: json['paymentMethod'] as String,
     );
 
@@ -23,6 +20,6 @@ Map<String, dynamic> _$SavedPaymentInfoToJson(SavedPaymentInfo instance) =>
       'alias': instance.alias,
       'cardNumber': instance.cardNumber,
       'cardHolder': instance.cardHolder,
-      'expiredDate': instance.expiredDate?.toJson(),
+      'expiredDate': instance.expiredDate,
       'paymentMethod': instance.paymentMethod,
     };

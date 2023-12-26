@@ -17,7 +17,7 @@ class SavedPaymentParams {
           alias: alias,
           cardNumber: cardNumber,
           cardHolder: cardHolder,
-          expiredDate: expiredDate,
+          expiredDate: expiredDate?.toJson(),
           paymentMethod: paymentMethod.rawValue,
          );
 
@@ -27,7 +27,7 @@ class SavedPaymentParams {
       alias: savedPayment.alias,
       cardNumber: savedPayment.cardNumber,
       cardHolder: savedPayment.cardHolder,
-      expiredDate: savedPayment.expiredDate,
+      expiredDate: savedPayment.expiredDate != null ? CardExpiredDate.fromJson(savedPayment.expiredDate!) : null,
       paymentMethod: PaymentMethodTypeExtension.fromRawValue(savedPayment.paymentMethod));
   }
 
@@ -36,7 +36,7 @@ class SavedPaymentParams {
   String get alias => _paymentInfo.alias;
   String get cardNumber => _paymentInfo.cardNumber;
   String? get cardHolder => _paymentInfo.cardHolder;
-  CardExpiredDate? get expiredDate => _paymentInfo.expiredDate;
+  CardExpiredDate? get expiredDate => _paymentInfo.expiredDate != null ? CardExpiredDate.fromJson(_paymentInfo.expiredDate!) : null;
   PaymentMethodType get paymentMethod => PaymentMethodTypeExtension.fromRawValue(_paymentInfo.paymentMethod);
 }
 
@@ -45,7 +45,7 @@ class SavedPaymentInfo {
   final String alias;
   final String cardNumber;
   final String? cardHolder;
-  final CardExpiredDate? expiredDate;
+  final Map<String, dynamic>? expiredDate;
   final String paymentMethod;
 
   SavedPaymentInfo({
