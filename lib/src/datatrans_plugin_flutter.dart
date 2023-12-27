@@ -5,7 +5,7 @@ import 'package:datatrans_plugin_flutter/src/model/payment_params.dart';
 import 'package:datatrans_plugin_flutter/src/model/saved_payment_params.dart';
 
 class DatatransPluginFlutter {
-  void initialize(String merchantId, String password, {bool isTesting = false, String appCallbackScheme = 'app.datatrans.flutter'}) async {
+  void initialize(String merchantId, String password, {bool isTesting = false, required String appCallbackScheme}) async {
     DatatransPluginFlutterPlatform.instance.initialize(merchantId, password, isTesting, appCallbackScheme);
   }
 

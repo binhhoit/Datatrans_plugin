@@ -20,7 +20,8 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _datatransFlutterPlugin.initialize("1110015614", "NvhOGev4xmiWesTg", isTesting: true);
+    //TODO: require set appCallbackScheme the same manifest and plist
+    _datatransFlutterPlugin.initialize("1110015614", "NvhOGev4xmiWesTg", isTesting: true, appCallbackScheme: 'app.datatrans.flutter');
   }
 
   @override
