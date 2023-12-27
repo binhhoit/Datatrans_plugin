@@ -2,6 +2,7 @@ name: datatrans_plugin_flutter
 description: "A new Datatrans SDK for Flutter plugin project."
 version: 1.0.0
 homepage:
+  https://github.com/binhhoit/Datatrans_plugin
 
 environment:
   sdk: '>=3.2.3 <4.0.0'
