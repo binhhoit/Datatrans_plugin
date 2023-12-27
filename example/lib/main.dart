@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:datatrans_plugin_flutter/datatrans_flutter.dart';
+import 'package:datatrans_plugin_flutter/datatrans_plugin_flutter.dart';
 
 void main() {
   runApp(const MyApp());
