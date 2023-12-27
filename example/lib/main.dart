@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:datatrans_plugin_flutter/datatrans_flutter.dart';
@@ -20,7 +19,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    //TODO: require set appCallbackScheme the same manifest and plist
     _datatransFlutterPlugin.initialize("1110015614", "NvhOGev4xmiWesTg", isTesting: true, appCallbackScheme: 'app.datatrans.flutter');
   }
 
@@ -28,17 +26,23 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Home(_datatransFlutterPlugin),
+      home: Home(datatransFlutterPlugin: _datatransFlutterPlugin),
     );
   }
 }
 
-class Home extends StatelessWidget {
-  final DatatransPluginFlutter _datatransFlutterPlugin;
+class Home extends StatefulWidget {
+  final DatatransPluginFlutter datatransFlutterPlugin;
 
+  const Home({super.key, required this.datatransFlutterPlugin});
+
+  @override
+  State<Home> createState() => HomeState();
+
+}
+
+class HomeState extends State<Home> {
   SavedPaymentParams? _savedPaymentParams;
-
-  Home(DatatransPluginFlutter datatransFlutterPlugin, {super.key}) : _datatransFlutterPlugin = datatransFlutterPlugin;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +68,7 @@ class Home extends StatelessWidget {
                       PaymentMethodType.paypal,
                       PaymentMethodType.americanExpress
                     ]);
-                  var result = await _datatransFlutterPlugin.payment(params: params);
+                  var result = await widget.datatransFlutterPlugin.payment(params: params);
                   _showMyDialog(context, result?.success ?? false, error: result?.error);
                   if (result?.success == true) {
                     _savedPaymentParams = result?.data;
@@ -84,7 +88,7 @@ class Home extends StatelessWidget {
                     paymentMethods: _savedPaymentParams != null ? [_savedPaymentParams!.paymentMethod] : []);
 
                   if (_savedPaymentParams != null) {
-                    var result = await _datatransFlutterPlugin.fastPayment(params: params, saveParams: _savedPaymentParams!);
+                    var result = await widget.datatransFlutterPlugin.fastPayment(params: params, saveParams: _savedPaymentParams!);
                     _showMyDialog(context, result?.success ?? false, error: result?.error);
                   }
                 },

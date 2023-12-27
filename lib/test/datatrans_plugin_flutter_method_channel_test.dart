@@ -1,11 +1,12 @@
-import 'package:datatrans_plugin_flutter/src/datatrans_plugin_flutter_method_channel.dart';
+// import 'package:datatrans_plugin_flutter/src/datatrans_plugin_flutter_method_channel.dart';
 import 'package:flutter/services.dart';
+// ignore: depend_on_referenced_packages
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  MethodChannelDatatransPluginFlutter platform = MethodChannelDatatransPluginFlutter();
+  // MethodChannelDatatransPluginFlutter platform = MethodChannelDatatransPluginFlutter();
   const MethodChannel channel = MethodChannel('datatrans_plugin_flutter');
 
   setUp(() {

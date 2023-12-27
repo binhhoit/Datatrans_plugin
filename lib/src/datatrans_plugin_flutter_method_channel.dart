@@ -23,14 +23,7 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
       "isTesting": isTesting,
       "appCallbackScheme": appCallbackScheme
     };
-    var results = await methodChannel.invokeMethod<Map<String, dynamic>>(methodName, dict);
-
-    if (results != null) {
-      var response = DatatransResponse<void>.fromJson(
-        results,
-        (e) => ());
-      print("initialize ${response.error}");
-    }
+    await methodChannel.invokeMethod<Map<String, dynamic>>(methodName, dict);
   }
 
   @override
