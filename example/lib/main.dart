@@ -67,6 +67,8 @@ class Home extends StatelessWidget {
                   _showMyDialog(context, result?.success ?? false, error: result?.error);
                   if (result?.success == true) {
                     _savedPaymentParams = result?.data;
+                  } else{
+                    print(result?.bodyError.toString());
                   }
                 },
               ),

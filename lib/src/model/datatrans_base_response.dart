@@ -7,11 +7,13 @@ class DatatransResponse<T> {
   final String? error;
   final bool success;
   final T? data;
+  final Object? bodyError;
 
   DatatransResponse({
     this.error,
     this.success = true,
     this.data,
+    this.bodyError
   });
 
   factory DatatransResponse.fromJson(
