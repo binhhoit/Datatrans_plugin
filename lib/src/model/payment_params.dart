@@ -1,4 +1,4 @@
-import 'package:datatrans_plugin_flutter/datatrans_flutter.dart';
+import 'package:datatrans_plugin_flutter/src/datatrans_define.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'payment_params.g.dart';
