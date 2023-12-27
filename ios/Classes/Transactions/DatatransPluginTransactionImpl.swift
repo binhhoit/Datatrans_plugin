@@ -12,13 +12,16 @@ import Alamofire
 class DatatransPluginTransactionImpl: DatatransPluginTransaction {
     private var hashBasicToken: String = ""
     private var isTesting: Bool = false
+    private var appCallbackScheme: String = ""
     internal var paymentCompletion: ((BaseReponse) -> Void)?
     
     func configure(params: TransactionInitializeParams) {
+        self.isTesting = params.isTesting
+        self.appCallbackScheme = params.appCallbackScheme
+        
         guard let credentialData = "\(params.merchantId):\(params.password)".data(using: String.Encoding.utf8) else {
             return
         }
-        self.isTesting = params.isTesting
         self.hashBasicToken = credentialData.base64EncodedString(options: [])
     }
     
@@ -86,7 +89,7 @@ extension DatatransPluginTransactionImpl {
         transaction.delegate = self
         transaction.options.testing = isTesting
         transaction.options.useCertificatePinning = true
-        transaction.options.appCallbackScheme = "app.datatrans.flutter"
+        transaction.options.appCallbackScheme = appCallbackScheme
         
         if let vc = UIApplication.shared.delegate?.window??.rootViewController {
             DispatchQueue.main.async {
