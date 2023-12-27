@@ -112,7 +112,7 @@ extension DatatransPluginTransactionImpl: TransactionDelegate {
     
     func transactionDidFail(_ transaction: Datatrans.Transaction, error: Datatrans.TransactionError) {
         paymentCompletion?(
-            BaseReponse(error: error.backendError?.name ?? error.localizedDescription, success: false, data: nil)
+            BaseReponse(error: error.localizedDescription, success: false, data: nil)
         )
     }
 }
