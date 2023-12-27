@@ -15,11 +15,12 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
   final methodChannel = const MethodChannel('datatrans_plugin_flutter');
 
   @override
-  void initialize(String merchantId, String password) async {
+  void initialize(String merchantId, String password, bool isTesting) async {
     var methodName = DatatransMethodIdentity.initialize.methodName;
     var dict = {
-      "merchantId" : merchantId, 
-      "password": password
+      "merchantId": merchantId,
+      "password": password,
+      "isTesting": isTesting
     };
     var results = await methodChannel.invokeMethod<Map<String, dynamic>>(methodName, dict);
 

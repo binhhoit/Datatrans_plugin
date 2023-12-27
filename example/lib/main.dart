@@ -20,7 +20,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _datatransFlutterPlugin.initialize("1110015614", "NvhOGev4xmiWesTg");
+    _datatransFlutterPlugin.initialize("1110015614", "NvhOGev4xmiWesTg", isTesting: true);
   }
 
   @override

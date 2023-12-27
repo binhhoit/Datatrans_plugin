@@ -10,6 +10,8 @@ data class ResultResponsePayment(
     val error: String? = null,
     @SerializedName("data")
     val data: Any? = null,
+    @SerializedName("bodyError")
+    val bodyError: Any? = null,
 ) {
     fun toJson(): String {
         return Gson().toJson(this)

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.lifecycleScope
+import ch.datatrans.payment.api.DCCShowMode
 import ch.datatrans.payment.api.Transaction
 import ch.datatrans.payment.api.TransactionListener
 import ch.datatrans.payment.api.TransactionRegistry
@@ -12,7 +13,6 @@ import ch.datatrans.payment.exception.TransactionException
 import ch.datatrans.payment.paymentmethods.CardExpiryDate
 import ch.datatrans.payment.paymentmethods.PaymentMethodType
 import ch.datatrans.payment.paymentmethods.SavedCard
-import ch.datatrans.payment.paymentmethods.SavedPaymentMethod
 import com.google.gson.Gson
 import com.sts.datatrans_plugin_flutter.data.model.DatatransRequest
 import com.sts.datatrans_plugin_flutter.data.model.ExpiredDate
@@ -20,6 +20,7 @@ import com.sts.datatrans_plugin_flutter.data.model.ResultResponsePayment
 import com.sts.datatrans_plugin_flutter.data.model.SaveCardPayment
 import com.sts.datatrans_plugin_flutter.data.repository.DatatransRepository
 import com.sts.datatrans_plugin_flutter.util.encode
+import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -35,7 +36,7 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
 
     companion object {
         const val TAG = "DatatransPlugin"
-        const val NAME ="datatrans_plugin_flutter"
+        const val NAME = "datatrans_plugin_flutter"
     }
 
     private lateinit var context: Context
@@ -46,38 +47,52 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
     private var result: Result? = null
     private var authorization: String? = null
     private var tokenPayment: String? = null
+    private var isTesting = false
 
     init {
-        Log.d(TAG, "init")
+        if (isTesting) {
+            Log.d(TAG, "init")
+        }
         repository = DatatransRepository()
     }
 
     private fun initSDKDataTransaction(savedPaymentMethod: SavedCard? = null) {
-        if (tokenPayment == null)
+        if (tokenPayment == null) {
             return
+        }
         transaction =
-            if (savedPaymentMethod != null)
+            if (savedPaymentMethod != null) {
                 Transaction(tokenPayment!!, savedPaymentMethod)
-            else Transaction(tokenPayment!!)
+            } else {
+                Transaction(tokenPayment!!)
+            }
 
         transaction.apply {
             options.appCallbackScheme = "app.datatrans.flutter"
             listener = object : TransactionListener {
                 override fun onTransactionError(exception: TransactionException) {
                     exception.printStackTrace()
-                    result?.success(ResultResponsePayment(false,exception.message, null).toJson())
+                    result?.success(
+                        ResultResponsePayment(
+                            success = false,
+                            error = exception.message,
+                            bodyError = exception,
+                        ).toJson(),
+                    )
                 }
 
                 override fun onTransactionSuccess(result: TransactionSuccess) {
-
                     val data = try {
                         (result.savedPaymentMethod as SavedCard).let {
-                            SaveCardPayment(it.alias,
+                            SaveCardPayment(
+                                it.alias,
                                 it.maskedCardNumber ?: "",
                                 it.cardholder ?: "",
-                                ExpiredDate(it.cardExpiryDate?.month ?: 0,
-                                    it.cardExpiryDate?.year ?: 0),
-                                it.type.identifier
+                                ExpiredDate(
+                                    it.cardExpiryDate?.month ?: 0,
+                                    it.cardExpiryDate?.year ?: 0,
+                                ),
+                                it.type.identifier,
                             )
                         }
                     } catch (e: Exception) {
@@ -86,29 +101,38 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
 
                     this@DatatransFlutterPlugin.result?.success(
                         ResultResponsePayment(
-                            true,
-                            null,
-                            data,
-                        ).toJson())
+                            success = true,
+                            data = data,
+                        ).toJson(),
+                    )
                 }
             }
-            options.isTesting = true
+            options.isTesting = isTesting
             options.useCertificatePinning = false
             options.suppressCriticalErrorDialog = true
             if (activity == null) {
-                result?.success(ResultResponsePayment(false,"not found activity", null).toJson())
+                result?.success(
+                    ResultResponsePayment(
+                        success = false,
+                        error = "Not found activity",
+                    ).toJson(),
+                )
             } else {
                 TransactionRegistry.startTransaction(activity!!, transaction)
             }
         }
-        Log.d(TAG, "install")
+        if (isTesting) {
+            Log.d(TAG, "install")
+        }
     }
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, NAME)
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
-        Log.d(TAG, "onAttachedToEngine")
+        if (isTesting) {
+            Log.d(TAG, "onAttachedToEngine")
+        }
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -117,23 +141,27 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
             DatatransMethod.INITIALIZE.label -> {
                 val merchantId = call.argument<String>("merchantId")
                 val password = call.argument<String>("password")
+                isTesting = call.argument<Boolean>("isTesting") ?: false
                 authorization = "Basic ${("$merchantId:$password").encode()}"
             }
+
             DatatransMethod.PAYMENT.label -> {
                 getTokenMobile(call.argument<Any>("payment") ?: Any())
             }
+
             DatatransMethod.SAVE_CARD.label -> {
                 getTokenMobile(call.argument<Any>("payment") ?: Any())
             }
+
             DatatransMethod.FAST_PAYMENT.label -> {
                 getTokenMobile(
                     call.argument<Any>("payment") ?: Any(),
                     createSaveCardPayment(call.argument<Any>("cards") ?: Any()),
                 )
             }
+
             else -> result.notImplemented()
         }
-
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -142,19 +170,27 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activity = binding.activity
-        Log.d(TAG, "onAttachedToActivity")
+        if (isTesting) {
+            Log.d(TAG, "onAttachedToActivity")
+        }
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
-        Log.d(TAG, "Detached")
+        if (isTesting) {
+            Log.d(TAG, "Detached")
+        }
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-        Log.d(TAG, "Reattached")
+        if (isTesting) {
+            Log.d(TAG, "Reattached")
+        }
     }
 
     override fun onDetachedFromActivity() {
-        Log.d(TAG, "Detached")
+        if (isTesting) {
+            Log.d(TAG, "Detached")
+        }
     }
 
     private fun getTokenMobile(
@@ -163,28 +199,40 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
     ) {
         (activity as FlutterFragmentActivity).apply {
             lifecycleScope.launch {
-                if (authorization == null)
-                    result?.success(ResultResponsePayment(false,
-                        "authorization not success",
-                        null).toJson())
+                if (authorization == null) {
+                    result?.success(
+                        ResultResponsePayment(
+                            success = false,
+                            error = "Authorization not success",
+                        ).toJson(),
+                    )
+                }
                 try {
-                    repository.getToken(authorization!!,
-                        createRequestPayment(argumentsPayment)).apply {
+                    repository.getToken(
+                        authorization!!,
+                        createRequestPayment(argumentsPayment),
+                    ).apply {
                         if (isSuccessful) {
                             tokenPayment = this.body()?.mobileToken ?: ""
                             initSDKDataTransaction(savedPaymentMethod)
                         } else {
-                            result?.success(ResultResponsePayment(false,
-                                "can't get token payment",
-                                null).toJson())
+                            result?.success(
+                                ResultResponsePayment(
+                                    false,
+                                    "Can't get token payment",
+                                ).toJson(),
+                            )
                         }
                     }
                 } catch (e: java.lang.Exception) {
-                    result?.success(ResultResponsePayment(false,
-                        "Get token mobile fail",
-                        null).toJson())
+                    result?.success(
+                        ResultResponsePayment(
+                            success = false,
+                            error = e.message,
+                            bodyError = e,
+                        ).toJson(),
+                    )
                 }
-
             }
         }
     }
@@ -192,7 +240,10 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
     private fun createRequestPayment(arguments: Any): DatatransRequest {
         val rawData =
             try {
-                Gson().fromJson(arguments.toString(), DatatransRequest::class.java)
+                Gson().fromJson(
+                    arguments.toString(),
+                    DatatransRequest::class.java,
+                )
             } catch (e: Exception) {
                 DatatransRequest("USD", "0", false, listOf("ECA", "VIS"))
             }
@@ -210,7 +261,10 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
     private fun createSaveCardPayment(arguments: Any): SavedCard {
         val rawData =
             try {
-                Gson().fromJson(Gson().toJson(arguments), SaveCardPayment::class.java)
+                Gson().fromJson(
+                    Gson().toJson(arguments),
+                    SaveCardPayment::class.java,
+                )
             } catch (e: Exception) {
                 SaveCardPayment("", "", "", ExpiredDate(0, 0), "")
             }
@@ -219,10 +273,12 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
             type = PaymentMethodType.fromIdentifier(rawData.paymentMethod)
                 ?: PaymentMethodType.VISA,
             alias = rawData.alias,
-            cardExpiryDate = CardExpiryDate(rawData.expiredDate.month,
-                rawData.expiredDate.year),
+            cardExpiryDate = CardExpiryDate(
+                rawData.expiredDate.month,
+                rawData.expiredDate.year,
+            ),
             maskedCardNumber = rawData.cardNumber,
-            cardholder = rawData.cardHolder
+            cardholder = rawData.cardHolder,
         )
     }
 }
