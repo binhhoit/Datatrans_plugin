@@ -9,6 +9,8 @@ import ch.datatrans.payment.api.TransactionListener
 import ch.datatrans.payment.api.TransactionRegistry
 import ch.datatrans.payment.api.TransactionSuccess
 import ch.datatrans.payment.exception.TransactionException
+import ch.datatrans.payment.paymentmethods.CardExpiryDate
+import ch.datatrans.payment.paymentmethods.PaymentMethodType
 import ch.datatrans.payment.paymentmethods.SavedCard
 import ch.datatrans.payment.paymentmethods.SavedPaymentMethod
 import com.google.gson.Gson
@@ -26,9 +28,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.StandardMessageCodec
 import kotlinx.coroutines.launch
-import java.lang.Exception
 
 /** DatatransFlutterPlugin */
 class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
@@ -52,7 +52,7 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
         repository = DatatransRepository()
     }
 
-    private fun initSDKDataTransaction(savedPaymentMethod: SavedPaymentMethod? = null) {
+    private fun initSDKDataTransaction(savedPaymentMethod: SavedCard? = null) {
         if (tokenPayment == null)
             return
         transaction =
@@ -70,14 +70,18 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
 
                 override fun onTransactionSuccess(result: TransactionSuccess) {
 
-                    val data = (result.savedPaymentMethod as SavedCard).let {
-                        SaveCardPayment(it.alias,
-                            it.maskedCardNumber ?: "",
-                            it.cardholder ?: "",
-                            ExpiredDate(it.cardExpiryDate?.month ?: 0,
-                                it.cardExpiryDate?.year ?: 0),
-                            it.type.identifier
-                        )
+                    val data = try {
+                        (result.savedPaymentMethod as SavedCard).let {
+                            SaveCardPayment(it.alias,
+                                it.maskedCardNumber ?: "",
+                                it.cardholder ?: "",
+                                ExpiredDate(it.cardExpiryDate?.month ?: 0,
+                                    it.cardExpiryDate?.year ?: 0),
+                                it.type.identifier
+                            )
+                        }
+                    } catch (e: Exception) {
+                        null
                     }
 
                     this@DatatransFlutterPlugin.result?.success(
@@ -116,13 +120,16 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
                 authorization = "Basic ${("$merchantId:$password").encode()}"
             }
             DatatransMethod.PAYMENT.label -> {
-                getTokenMobile(call.arguments)
+                getTokenMobile(call.argument<Any>("payment") ?: Any())
             }
             DatatransMethod.SAVE_CARD.label -> {
-                getTokenMobile(call.arguments)
+                getTokenMobile(call.argument<Any>("payment") ?: Any())
             }
             DatatransMethod.FAST_PAYMENT.label -> {
-                getTokenMobile(call.arguments)
+                getTokenMobile(
+                    call.argument<Any>("payment") ?: Any(),
+                    createSaveCardPayment(call.argument<Any>("cards") ?: Any()),
+                )
             }
             else -> result.notImplemented()
         }
@@ -150,32 +157,72 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
         Log.d(TAG, "Detached")
     }
 
-    private fun getTokenMobile(arguments: Any) {
+    private fun getTokenMobile(
+        argumentsPayment: Any,
+        savedPaymentMethod: SavedCard? = null,
+    ) {
         (activity as FlutterFragmentActivity).apply {
             lifecycleScope.launch {
-                val rawData = Gson().fromJson(arguments.toString(), DatatransRequest::class.java)
-                val request = DatatransRequest(
-                    rawData.currency,
-                    rawData.amount,
-                    rawData.autoSettle,
-                    rawData.paymentMethods,
-                ).apply {
-                    isSaveAlias = rawData.isSaveAlias
-                }
-                if(authorization==null)
-                    result?.success(ResultResponsePayment(false,"authorization not success", null).toJson())
-                repository.getToken(authorization!!,request).apply {
-                    if (isSuccessful) {
-                        tokenPayment = this.body()?.mobileToken ?: ""
-                        val savedPaymentMethod = Gson().fromJson(arguments.toString(), SavedPaymentMethod::class.java)
-                        Log.e(TAG,savedPaymentMethod.toJson())
-                        initSDKDataTransaction()
-                    } else {
-                        result?.success(ResultResponsePayment(false,"can't get token payment", null).toJson())
+                if (authorization == null)
+                    result?.success(ResultResponsePayment(false,
+                        "authorization not success",
+                        null).toJson())
+                try {
+                    repository.getToken(authorization!!,
+                        createRequestPayment(argumentsPayment)).apply {
+                        if (isSuccessful) {
+                            tokenPayment = this.body()?.mobileToken ?: ""
+                            initSDKDataTransaction(savedPaymentMethod)
+                        } else {
+                            result?.success(ResultResponsePayment(false,
+                                "can't get token payment",
+                                null).toJson())
+                        }
                     }
+                } catch (e: java.lang.Exception) {
+                    result?.success(ResultResponsePayment(false,
+                        "Get token mobile fail",
+                        null).toJson())
                 }
+
             }
         }
+    }
 
+    private fun createRequestPayment(arguments: Any): DatatransRequest {
+        val rawData =
+            try {
+                Gson().fromJson(arguments.toString(), DatatransRequest::class.java)
+            } catch (e: Exception) {
+                DatatransRequest("USD", "0", false, listOf("ECA", "VIS"))
+            }
+
+        return DatatransRequest(
+            rawData.currency,
+            rawData.amount,
+            rawData.autoSettle,
+            rawData.paymentMethods,
+        ).apply {
+            isSaveAlias = rawData.isSaveAlias
+        }
+    }
+
+    private fun createSaveCardPayment(arguments: Any): SavedCard {
+        val rawData =
+            try {
+                Gson().fromJson(Gson().toJson(arguments), SaveCardPayment::class.java)
+            } catch (e: Exception) {
+                SaveCardPayment("", "", "", ExpiredDate(0, 0), "")
+            }
+
+        return SavedCard(
+            type = PaymentMethodType.fromIdentifier(rawData.paymentMethod)
+                ?: PaymentMethodType.VISA,
+            alias = rawData.alias,
+            cardExpiryDate = CardExpiryDate(rawData.expiredDate.month,
+                rawData.expiredDate.year),
+            maskedCardNumber = rawData.cardNumber,
+            cardholder = rawData.cardHolder
+        )
     }
 }
