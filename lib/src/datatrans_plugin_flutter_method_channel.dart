@@ -15,12 +15,13 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
   final methodChannel = const MethodChannel('datatrans_plugin_flutter');
 
   @override
-  void initialize(String merchantId, String password, bool isTesting) async {
+  void initialize(String merchantId, String password, bool isTesting, String appCallbackScheme) async {
     var methodName = DatatransMethodIdentity.initialize.methodName;
     var dict = {
       "merchantId": merchantId,
       "password": password,
-      "isTesting": isTesting
+      "isTesting": isTesting,
+      "appCallbackScheme": appCallbackScheme
     };
     var results = await methodChannel.invokeMethod<Map<String, dynamic>>(methodName, dict);
 
@@ -29,23 +30,6 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
         results,
         (e) => ());
       print("initialize ${response.error}");
-    }
-  }
-
-  @override
-  Future<DatatransResponse<void>?> saveCardPaymentInfo() async {
-    var methodName = DatatransMethodIdentity.saveCardPaymentInfo.methodName;
-    try {
-      final results = await methodChannel.invokeMethod<Map<String, dynamic>>(methodName);
-      if (results != null) {
-        var response = DatatransResponse<void>.fromJson(
-          results,
-          (e) => ());
-        return response;
-      }
-      return DatatransResponse(error: "Payment not success", success: false, data: null);
-    } catch (e) {
-      return DatatransResponse(error: e.toString() , success: false, data: null);
     }
   }
 

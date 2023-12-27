@@ -29,5 +29,19 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <activity
+            android:name="ch.datatrans.payment.ExternalProcessRelayActivity"
+            android:launchMode="singleTask"
+            android:enabled="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="app.datatrans.flutter.dtsdk" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

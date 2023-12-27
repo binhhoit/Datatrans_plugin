@@ -49,6 +49,7 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
     private var authorization: String? = null
     private var tokenPayment: String? = null
     private var isTesting = false
+    private var appCallbackScheme = "app.datatrans.flutter"
 
     init {
         if (isTesting) {
@@ -69,7 +70,7 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
             }
 
         transaction.apply {
-            options.appCallbackScheme = "app.datatrans.flutter"
+            options.appCallbackScheme = appCallbackScheme
             listener = object : TransactionListener {
                 override fun onTransactionError(exception: TransactionException) {
                     exception.printStackTrace()
@@ -143,6 +144,7 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
                 val merchantId = call.argument<String>("merchantId")
                 val password = call.argument<String>("password")
                 isTesting = call.argument<Boolean>("isTesting") ?: false
+                appCallbackScheme = call.argument<String>("appCallbackScheme") ?: ""
                 authorization = "Basic ${("$merchantId:$password").encode()}"
             }
 
