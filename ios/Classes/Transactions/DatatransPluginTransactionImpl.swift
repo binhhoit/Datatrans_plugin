@@ -11,13 +11,14 @@ import Alamofire
 
 class DatatransPluginTransactionImpl: DatatransPluginTransaction {
     private var hashBasicToken: String = ""
+    private var isTesting: Bool = false
     internal var paymentCompletion: ((BaseReponse) -> Void)?
     
     func configure(params: TransactionInitializeParams) {
         guard let credentialData = "\(params.merchantId):\(params.password)".data(using: String.Encoding.utf8) else {
             return
         }
-        
+        self.isTesting = params.isTesting
         self.hashBasicToken = credentialData.base64EncodedString(options: [])
     }
     
@@ -43,7 +44,8 @@ class DatatransPluginTransactionImpl: DatatransPluginTransaction {
                 )
                 return
             }
-            self?.startTransaction(mobileToken: mobileToken, savePaymentMethod: savePaymentMethod.savePayment)
+            self?.startTransaction(mobileToken: mobileToken,
+                                   savePaymentMethod: savePaymentMethod.savePayment)
         }
     }
 }
@@ -73,7 +75,8 @@ extension DatatransPluginTransactionImpl {
         }
     }
     
-    func startTransaction(mobileToken: String, savePaymentMethod: SavedPaymentMethod? = nil) {
+    func startTransaction(mobileToken: String, 
+                          savePaymentMethod: SavedPaymentMethod? = nil) {
         var transaction: Transaction
         if let savePaymentMethod = savePaymentMethod {
             transaction = Transaction(mobileToken: mobileToken, savedPaymentMethod: savePaymentMethod)
@@ -81,8 +84,7 @@ extension DatatransPluginTransactionImpl {
             transaction = Transaction(mobileToken: mobileToken)
         }
         transaction.delegate = self
-        transaction.options.testing = true
-        transaction.options.savedCardDCCShowMode = .smart
+        transaction.options.testing = isTesting
         transaction.options.useCertificatePinning = true
         transaction.options.appCallbackScheme = "app.datatrans.flutter"
         
