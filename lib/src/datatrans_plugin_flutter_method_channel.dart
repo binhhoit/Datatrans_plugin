@@ -43,7 +43,7 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
           (e) => ());
         return response;
       }
-      return DatatransResponse(error: "result empty", success: false, data: null);
+      return DatatransResponse(error: "Payment not success", success: false, data: null);
     } catch (e) {
       return DatatransResponse(error: e.toString() , success: false, data: null);
     }
@@ -64,7 +64,7 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
           (e) => SavedPaymentParams.fromJson(e as Map<String, dynamic>));
         return response;
       }
-      return DatatransResponse(error: "result empty", success: false, data: null);
+      return DatatransResponse(error: "Payment not success", success: false, data: null);
     } catch (e) {
       return DatatransResponse(error: e.toString() , success: false, data: null);
     }
@@ -86,7 +86,7 @@ class MethodChannelDatatransPluginFlutter extends DatatransPluginFlutterPlatform
           (e) => SavedPaymentParams.fromJson(e as Map<String, dynamic>));
         return response;
       }
-      return DatatransResponse(error: "result empty", success: false, data: null);
+      return DatatransResponse(error: "Payment not success", success: false, data: null);
     } catch (e) {
       return DatatransResponse(error: e.toString() , success: false, data: null);
     }

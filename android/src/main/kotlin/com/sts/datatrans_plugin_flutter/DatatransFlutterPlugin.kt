@@ -29,6 +29,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /** DatatransFlutterPlugin */
@@ -198,7 +199,7 @@ class DatatransFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware {
         savedPaymentMethod: SavedCard? = null,
     ) {
         (activity as FlutterFragmentActivity).apply {
-            lifecycleScope.launch {
+            lifecycleScope.launch(Dispatchers.IO) {
                 if (authorization == null) {
                     result?.success(
                         ResultResponsePayment(
